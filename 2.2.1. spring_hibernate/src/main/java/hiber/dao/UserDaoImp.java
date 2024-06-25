@@ -2,28 +2,26 @@ package hiber.dao;
 
 import hiber.model.User;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
 public class UserDaoImp implements UserDao {
+   private final SessionFactory sessionFactory;
 
    @Autowired
-   private SessionFactory sessionFactory;
-
-   @Override
-   public User getUserByCarModelAndSeries(String model, int series) {
-      String hql = "from User u join fetch u.car c where c.model = :model and c.series = :series";
-      return sessionFactory.getCurrentSession().createQuery(hql, User.class)
-              .setParameter("model", model)
-              .setParameter("series", series)
-              .getSingleResult();
+   public UserDaoImp(SessionFactory sessionFactory) {
+      this.sessionFactory = sessionFactory;
    }
 
    @Override
+   @Transactional
    public void add(User user) {
       sessionFactory.getCurrentSession().save(user);
    }
@@ -35,4 +33,13 @@ public class UserDaoImp implements UserDao {
       return query.getResultList();
    }
 
+   @Override
+   @SuppressWarnings("unchecked")
+   public User getUserByCar(String model, int series) {
+      TypedQuery<User> query = sessionFactory.getCurrentSession().createQuery
+              ("from User user where user.car.model = :model and user.car.series = :series");
+      query.setParameter("model", model)
+              .setParameter("series", series);
+      return query.getSingleResult();
+   }
 }

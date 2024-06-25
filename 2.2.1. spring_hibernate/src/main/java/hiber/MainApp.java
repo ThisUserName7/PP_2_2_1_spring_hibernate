@@ -6,6 +6,7 @@ import hiber.model.User;
 import hiber.service.UserService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import javax.persistence.NoResultException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -16,24 +17,31 @@ public class MainApp {
 
       UserService userService = context.getBean(UserService.class);
 
-      userService.add(new User("User1", "Lastname1", "user1@gmail.com", new Car("BMW", 1)));
-      userService.add(new User("User2", "Lastname2", "user2@gmail.com", new Car("Nissan", 2)));
-      userService.add(new User("User3", "Lastname3", "user3@gmail.com", new Car("Mitsubishi", 3)));
-      userService.add(new User("User4", "Lastname4", "user4@gmail.com", new Car("Cadilac", 4)));
-      userService.add(new User("User5", "Lastname5", "user5@gmail.com", null));
-      userService.add(new User("User6", "Lastname6", "user7@gmail.com"));
+      userService.add(new User("user1","lastName1","email1@mail.ru").setCar(new Car("Model1",11)));
+      userService.add(new User("user2","lastName2","email2@mail.ru").setCar(new Car("Model2",22)));
+      userService.add(new User("user3","lastName3","email3@mail.ru").setCar(new Car("Model3",33)));
+      userService.add(new User("user4","lastName4","email4@mail.ru").setCar(new Car("Model4",44)));
+      userService.add(new User("user5","lastName5","email5@mail.ru").setCar(new Car("Model5",55)));
 
       List<User> users = userService.listUsers();
       for (User user : users) {
-         if(user.getCar() != null){
-            System.out.println(user);
-         } else {
-            System.out.println(user.toString2());
-         }
+         System.out.println("Id is - " + user.getId());
+         System.out.println("Name is - " + user.getFirstName());
+         System.out.println("Last name is - " + user.getLastName());
+         System.out.println("User email is - " + user.getEmail());
+         System.out.println("Car is -" + "{"+user.getCar()+"}");
       }
-      User byUserCar = userService.getUserByCarModelAndSeries("Nissan", 2);
-      System.out.println(byUserCar);
 
+      System.out.println();
+
+      User user = userService.getUserByCar("Model1",11);
+      System.out.println("For user id = "+user.getId() + "Name is - " + user.getFirstName() + " Last name is - " + user.getLastName() + " Email is - " + user.getEmail()+ "Car is - " + "{ "+user.getCar()+" }");
+
+      try {
+         User notFoundUser = userService.getUserByCar("Model767",88);
+      } catch (NoResultException e) {
+         System.out.println("No found");
+      }
       context.close();
    }
 }
